@@ -27,7 +27,8 @@ Gimlet library use.
 You can run `gimlet-proxy` by using `go run` like this:
 
 ```
-go run gimlet-proxy/gimlet-proxy.go
+cd gimlet-proxy
+go run gimlet-proxy.go
 ```
 
 There are following command-line options:
@@ -52,7 +53,10 @@ Below are some examples of `gimlet-proxy` use.
 
 Run the gimlet proxy:
 
-`go run gimlet-proxy/gimlet-proxy.go --profile mine --instance-id i-031b47513614f3e63 -target-port 22 -listen-port 2222`
+```
+$ cd gimlet-proxy
+$ go run gimlet-proxy.go --profile mine --instance-id i-031b47513614f3e63 -target-port 22 -listen-port 2222
+```
 
 Then use SSH to connect to the instance (via localhost):
 
@@ -85,7 +89,8 @@ aws --profile mine ssm start-session \
 Run the `gimlet-proxy` tool:
 
 ```
-$ go run gimlet-proxy/gimlet-proxy.go --profile mine --instance-id i-031b47513614f3e63 \ 
+$ cd gimlet-proxy
+$ go run gimlet-proxy.go --profile mine --instance-id i-031b47513614f3e63 \ 
     -target-host 172.51.65.12 -target-port 80 -listen-port 8080
 ```
 
@@ -96,7 +101,8 @@ And then use a browser to access it via `http://localhost:8080`.
 Run the `gimlet-proxy` tool:
 
 ```
-$ go run gimlet-proxy/gimlet-proxy.go --profile mine --instance-id i-031b47513614f3e63 \ 
+$ cd gimlet-proxy
+$ go run gimlet-proxy.go --profile mine --instance-id i-031b47513614f3e63 \ 
     -target-host demo-db.ci12341234bp.us-east-2.rds.amazonaws.com -target-port 5432 -listen-port 5432
 ```
 
