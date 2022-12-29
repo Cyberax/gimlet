@@ -23,9 +23,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.17.7 // indirect
 	github.com/aws/smithy-go v1.13.5 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/xtaci/smux v1.5.17 // indirect
+	golang.org/x/net v0.4.0 // indirect
 )
 
 replace github.com/Cyberax/gimlet => ../

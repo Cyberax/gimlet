@@ -1,12 +1,10 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"github.com/Cyberax/gimlet/internal/utils"
 	"github.com/Cyberax/gimlet/log"
 	"github.com/Cyberax/gimlet/mgsproto"
-	"github.com/gorilla/websocket"
 	"io"
 	"sync"
 	"time"
@@ -92,10 +90,9 @@ func (r *Receiver) runReader() {
 }
 
 func (r *Receiver) runReaderIteration() bool {
-	_, msgBytes, err := r.conn.ReadMessage()
+	msgBytes, err := r.conn.ReadMessage()
 	if err != nil {
-		var closeErr *websocket.CloseError
-		if errors.As(err, &closeErr) && closeErr.Code == websocket.CloseNormalClosure {
+		if err == io.EOF {
 			r.onErrorCallback(io.EOF)
 		} else {
 			err := fmt.Errorf("failed to read the message: %w", err)

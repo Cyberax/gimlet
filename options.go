@@ -2,7 +2,6 @@ package gimlet
 
 import (
 	"github.com/Cyberax/gimlet/log"
-	"github.com/gorilla/websocket"
 	"github.com/xtaci/smux"
 	"time"
 )
@@ -21,7 +20,6 @@ type ConnInfo struct {
 }
 
 type ChannelOptions struct {
-	Dialer     *websocket.Dialer
 	Log        *log.GimletLogger
 	SmuxConfig *smux.Config
 
@@ -34,7 +32,6 @@ type ChannelOptions struct {
 func DefaultChannelOptions() ChannelOptions {
 	config := smux.DefaultConfig()
 	return ChannelOptions{
-		Dialer:     websocket.DefaultDialer,
 		Log:        log.NoLogging(),
 		SmuxConfig: config,
 
@@ -51,7 +48,6 @@ func DefaultChannelOptions() ChannelOptions {
 func DebugChannelOptions(logPayloadData bool) ChannelOptions {
 	config := smux.DefaultConfig()
 	return ChannelOptions{
-		Dialer:     websocket.DefaultDialer,
 		Log:        log.EnableAllLogs(logPayloadData),
 		SmuxConfig: config,
 

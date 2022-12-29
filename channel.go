@@ -9,8 +9,8 @@ import (
 	"github.com/Cyberax/gimlet/internal/utils"
 	"github.com/Cyberax/gimlet/log"
 	"github.com/Cyberax/gimlet/mgsproto"
-	"github.com/gorilla/websocket"
 	"github.com/xtaci/smux"
+	"golang.org/x/net/websocket"
 	"io"
 	"sync"
 )
@@ -34,12 +34,26 @@ type Channel struct {
 	stats log.Stats
 }
 
+// NewChannel creates a new Gimlet connection to the specified endpoint, the websocket connection
+// uses the standard defaults. `ctx` parameter can be used for cancellation or deadline support.
 func NewChannel(ctx context.Context, endpoint string, token string, options ChannelOptions) (*Channel, error) {
-	conn, _, err := websocket.DefaultDialer.DialContext(ctx, endpoint, nil)
+	config, err := websocket.NewConfig(endpoint, endpoint)
 	if err != nil {
 		return nil, err
 	}
 
+	conn, err := internal.DialWebSocket(ctx, config)
+	if err != nil {
+		return nil, err
+	}
+
+	channel := NewChannelWithConnection(conn, token, options)
+	return channel, nil
+}
+
+// NewChannelWithConnection creates a new Gimlet channel over a caller-provided Websocket connection. The function
+// still does the full MGS handshake.
+func NewChannelWithConnection(conn *websocket.Conn, token string, options ChannelOptions) *Channel {
 	wc := &Channel{
 		options:           options,
 		done:              make(chan bool),
@@ -47,16 +61,18 @@ func NewChannel(ctx context.Context, endpoint string, token string, options Chan
 		conn:              conn,
 	}
 
-	wc.sender = internal.NewSender(conn, wc.close,
+	wsAdapter := internal.NewWSAdapter(conn)
+
+	wc.sender = internal.NewSender(wsAdapter, wc.close,
 		options.MaxPacketsPerSecond, options.ResendTimeout, options.Log, &wc.stats)
-	wc.receiver = internal.NewReceiver(conn, wc.close, wc.sender.EnqueueAck, options.Log, &wc.stats)
+	wc.receiver = internal.NewReceiver(wsAdapter, wc.close, wc.sender.EnqueueAck, options.Log, &wc.stats)
 
 	wc.options.Log.LogInfo("Starting connection to token: " + token)
 	wc.sender.EnqueueChannelOpen(token)
 
 	go wc.runControlQueueReader()
 
-	return wc, nil
+	return wc
 }
 
 // GetStats returns the object that tracks live channel statistics

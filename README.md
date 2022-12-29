@@ -115,24 +115,25 @@ designed to have as few external dependencies as possible. As such, it's split i
 
 ## Pierce 
 
-`github.com/Cyberax/gimlet/pierce` module is used to prepare the connection by establishing the SSM session.  
+`github.com/Cyberax/gimlet/pierce` module is used to prepare the connection by establishing the SSM session.
 
 ```go
 package main
 
 import (
 	"context"
+	"github.com/Cyberax/gimlet"
 	"github.com/Cyberax/gimlet/pierce"
 	"github.com/aws/aws-sdk-go-v2/aws"
 )
 
-func prepare(config aws.Config) (*pierce.ConnInfo, error) {
+func prepare(config aws.Config) (*gimlet.ConnInfo, error) {
 	// Prepare the connection to 172.16.22.44:22 via EC2 instance i-123123123213
 	connInfo, err := pierce.PierceVpcVeil(context.Background(), config, "i-123123123213", "172.16.22.44", 22)
 	if err != nil {
 		return nil, err
-    }
-    return connInfo, nil
+	}
+	return connInfo, nil
 }
 ```
 
@@ -185,10 +186,11 @@ if err != nil {
 defer channel.Shutdown(context.Background()) // Make sure resources are freed
 ```
 
-This `NewChannel` accept a `context.Context` that can be used to cancel the pending WebSocket connection. 
+This `NewChannel` accept a `context.Context` that can be used to cancel the pending WebSocket connection. It also 
+accepts a `gimlet.ChannelOptions` that specifies various channel settings. 
 
-It also accepts a `gimlet.ChannelOptions` that specifies various channel settings. You can use this object to modify 
-the `Dialer` interface used by the WebSocket library to establish the connection, which might be useful in tests.
+If you want to modify the dialer options or other low-level connection settings (e.g. for tests), you can use 
+`gimlet.NewChannelWithConnection` function that accepts a caller-established WebSocket connection.
 
 The `NewChannel` function starts background goroutines, so you need to make sure that you clean up the resources by
 calling `Terminate` or `Shutdown` methods of `gimlet.Channel` when you're finished with it.

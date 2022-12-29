@@ -9,7 +9,6 @@ import (
 	"github.com/Cyberax/gimlet/log"
 	"github.com/Cyberax/gimlet/mgsproto"
 	"github.com/google/uuid"
-	"github.com/gorilla/websocket"
 	"io"
 	"sync"
 	"sync/atomic"
@@ -391,7 +390,7 @@ func (s *Sender) tryDequeMessage(pinger *time.Ticker) (*outgoingMessage, bool) {
 		case <-pinger.C:
 			// A simple fire-and-forget ping message
 			s.stats.NumPingsSent.Add(1)
-			_ = s.conn.WriteMessage(websocket.PingMessage, []byte("keepalive"))
+			_ = s.conn.SendPing()
 			return nil, true
 		}
 	}
@@ -422,17 +421,13 @@ func (s *Sender) send(m *outgoingMessage) {
 
 	var err error
 	if m.isDirectMessage {
-		err = s.conn.WriteMessage(websocket.TextMessage, m.data)
+		err = s.conn.WriteText(string(m.data))
 	} else {
-		err = s.conn.WriteMessage(websocket.BinaryMessage, m.data)
+		err = s.conn.WriteMessage(m.data)
 	}
 
 	if err != nil {
-		if err == websocket.ErrCloseSent {
-			s.onErrorCallback(io.EOF) // The normal closure
-		} else {
-			s.onErrorCallback(err)
-		}
+		s.onErrorCallback(err)
 		return
 	}
 
